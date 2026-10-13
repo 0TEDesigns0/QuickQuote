@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TED Quick Quote</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#FAF9F6;color:#2C2C2A;min-height:100vh;display:flex;justify-content:center;padding:2rem 1rem}
+.wrap{max-width:520px;width:100%}
+.logo{font-size:10px;letter-spacing:.22em;color:#888780;text-transform:uppercase;margin-bottom:6px}
+.title{font-size:24px;font-weight:500;color:#2C2C2A;margin-bottom:3px;font-family:Georgia,'Times New Roman',serif}
+.subtitle{font-size:13px;color:#888780;margin-bottom:.9rem;line-height:1.6}
+.sync-row{display:flex;align-items:center;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+.badge{display:inline-block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#A32D2D;background:#FDF2F2;border:1px solid #F3D9D9;border-radius:4px;padding:3px 8px}
+.sync-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:#5F5E5A;background:#F1EFE8;border:1px solid #D3D1C7;border-radius:4px;padding:3px 8px}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:#5A8F5A}
+.field{margin-bottom:1.1rem}
+.field label{display:block;font-size:11px;color:#888780;margin-bottom:5px;letter-spacing:.05em;text-transform:uppercase}
+.field input,.field select{width:100%;padding:11px 14px;font-size:15px;font-family:inherit;border:1px solid #D3D1C7;border-radius:6px;background:#fff;color:#2C2C2A;transition:border-color .15s}
+.field input:focus,.field select:focus{outline:none;border-color:#888780}
+.field input::placeholder{color:#B4B2A9}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#rondel-fields,#sashiko-fields,#leadlight-fields{display:none}
+#rondel-fields.active,#sashiko-fields.active,#leadlight-fields.active{display:block}
+.group-card{border:1px solid #D3D1C7;border-radius:8px;padding:1rem;margin-bottom:.75rem;background:#fff}
+.group-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem}
+.group-label{font-size:11px;color:#888780;letter-spacing:.05em;text-transform:uppercase;font-weight:500}
+.group-remove{font-size:12px;color:#B4B2A9;cursor:pointer;border:none;background:none;padding:4px 8px;border-radius:4px;font-family:inherit}
+.group-remove:hover{color:#A32D2D;background:#FDF2F2}
+.group-row3{display:grid;grid-template-columns:1fr 1fr 70px;gap:8px}
+.group-row3 .field{margin-bottom:0}
+.group-row3 .field input{padding:9px 10px;font-size:14px}
+.group-row4{display:grid;grid-template-columns:1fr 1fr 60px 110px;gap:8px}
+.group-row4 .field{margin-bottom:0}
+.group-row4 .field input,.group-row4 .field select{padding:9px 10px;font-size:14px}
+button.add-group{width:100%;padding:10px;font-size:13px;font-family:inherit;font-weight:500;border-radius:6px;cursor:pointer;border:1px dashed #D3D1C7;background:transparent;color:#888780;margin-bottom:1.1rem;transition:all .15s}
+button.add-group:hover{border-color:#888780;color:#2C2C2A}
+.result{display:none;margin-top:1.5rem}
+.result.show{display:block}
+.r-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#888780;margin-bottom:8px}
+.r-range{display:flex;align-items:baseline;gap:10px;margin-bottom:.4rem}
+.r-lo,.r-hi{font-size:30px;font-weight:500;color:#2C2C2A;font-family:Georgia,'Times New Roman',serif}
+.r-dash{font-size:20px;color:#D3D1C7}
+.r-psf{font-size:12px;color:#888780;margin-bottom:1.1rem}
+.r-cols{display:grid;grid-template-columns:1fr 1fr;gap:0 20px;margin-bottom:1rem}
+.r-col-title{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#888780;padding-bottom:6px;border-bottom:1px solid #D3D1C7;margin-bottom:6px}
+.r-col-val{font-size:26px;font-weight:500;color:#2C2C2A;font-family:Georgia,'Times New Roman',serif}
+.r-col-psf{font-size:11px;color:#B4B2A9;margin-top:2px}
+.r-specs{border:1px solid #D3D1C7;border-radius:8px;padding:.85rem 1.1rem;background:#F1EFE8;margin-bottom:1rem}
+.r-specs p{font-size:12px;color:#5F5E5A;line-height:1.7}
+.r-specs strong{color:#2C2C2A;font-weight:500}
+.r-note{font-size:11px;color:#B4B2A9;line-height:1.7;margin-top:1rem;padding-top:1rem;border-top:1px solid #D3D1C7}
+.thin-data{margin-top:.75rem;font-size:11.5px;color:#A36B1F;background:#FFF8E8;border:1px solid #F0D9A8;border-radius:6px;padding:8px 10px;line-height:1.5;display:none}
+.thin-data.show{display:block}
+.escalate{display:none;margin-top:1.5rem;border:1px solid #F0D9A8;background:#FFF8E8;border-radius:8px;padding:1rem 1.1rem}
+.escalate.show{display:block}
+.escalate-title{font-size:13px;font-weight:600;color:#8A6116;margin-bottom:4px}
+.escalate-body{font-size:12.5px;color:#6B5A2E;line-height:1.6}
+.no-data{display:none;margin-top:1.5rem;border:1px solid #D3D1C7;background:#F1EFE8;border-radius:8px;padding:1rem 1.1rem}
+.no-data.show{display:block}
+.no-data-title{font-size:13px;font-weight:600;color:#2C2C2A;margin-bottom:4px}
+.no-data-body{font-size:12.5px;color:#5F5E5A;line-height:1.6}
+.footer{font-size:10.5px;color:#B4B2A9;line-height:1.7;margin-top:2rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">Theodore Ellison Designs</div>
+  <div class="title">Quick quote</div>
+  <div class="subtitle">For verbal ballparks in sales conversations only — not a quote. Always confirm with the full estimator before committing to a number with a client.</div>
+  <div class="sync-row">
+    <span class="badge">Internal use only</span>
+    <span class="sync-badge"><span class="sync-dot"></span><span id="syncLabel"></span></span>
+  </div>
+
+  <div class="field"><label>Product</label>
+    <select id="product" onchange="switchProduct()">
+      <option value="Rondel">Rondel</option>
+      <option value="Sashiko">Mosaic Sashiko</option>
+      <option value="Leadlight">Leadlight</option>
+    </select>
+  </div>
+
+  <!-- RONDEL -->
+  <div id="rondel-fields">
+    <div class="row2">
+      <div class="field"><label>Pattern</label>
+        <select id="rPattern" onchange="calc()">
+          <option value="Offset">Offset</option>
+          <option value="Align">Align</option>
+          <option value="Lucent">Lucent</option>
+        </select>
+      </div>
+      <div class="field"><label>Glass</label>
+        <select id="rColor" onchange="calc()">
+          <option value="Color">Color</option>
+          <option value="Clear">Clear</option>
+        </select>
+      </div>
+    </div>
+    <div id="rGroups"></div>
+    <button class="add-group" onclick="addRGroup()">+ Add another panel size</button>
+  </div>
+
+  <!-- SASHIKO -->
+  <div id="sashiko-fields">
+    <div class="field"><label>Finish</label>
+      <select id="sFinish" onchange="calc()">
+        <option value="Standard">Standard</option>
+        <option value="Honed">Honed</option>
+      </select>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Face width</label><input id="sFaceW" type="number" placeholder='72&quot;' step="0.25" oninput="calc()"></div>
+      <div class="field"><label>Face height</label><input id="sFaceH" type="number" placeholder='62&quot;' step="0.25" oninput="calc()"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Firebox width</label><input id="sBoxW" type="number" placeholder='48&quot;' step="0.25" oninput="calc()"></div>
+      <div class="field"><label>Firebox height</label><input id="sBoxH" type="number" placeholder='20&quot;' step="0.25" oninput="calc()"></div>
+    </div>
+  </div>
+
+  <!-- LEADLIGHT -->
+  <div id="leadlight-fields">
+    <div class="field"><label>Pattern</label>
+      <select id="lPattern" onchange="calc()">
+        <option value="Century">Century</option>
+        <option value="Jot">Jot</option>
+        <option value="Slanted">Slanted</option>
+        <option value="Superball">Superball</option>
+      </select>
+    </div>
+    <div id="lGroups"></div>
+    <button class="add-group" onclick="addLGroup()">+ Add another panel size</button>
+  </div>
+
+  <!-- RONDEL RESULT -->
+  <div class="result" id="rondelResult">
+    <div class="r-label">Ballpark Range</div>
+    <div class="r-range"><span class="r-lo" id="rLo">$0</span><span class="r-dash">&ndash;</span><span class="r-hi" id="rHi">$0</span></div>
+    <div class="r-psf" id="rPsf"></div>
+    <div class="r-specs"><p id="rSpecs"></p></div>
+    <div class="thin-data" id="rThin"></div>
+    <div class="r-note">Excludes design fee nuance, shipping, crating, sales tax, and installation. Verbal ballpark only.</div>
+  </div>
+  <div class="escalate" id="rEscalate">
+    <div class="escalate-title">Large / XL project — use the full estimator</div>
+    <div class="escalate-body" id="rEscalateBody"></div>
+  </div>
+  <div class="no-data" id="rNoData">
+    <div class="no-data-title">No data for this combination yet</div>
+    <div class="no-data-body" id="rNoDataBody"></div>
+  </div>
+
+  <!-- SASHIKO RESULT -->
+  <div class="result" id="sashikoResult">
+    <div class="r-label">Ballpark Range</div>
+    <div class="r-range"><span class="r-lo" id="sLo">$0</span><span class="r-dash">&ndash;</span><span class="r-hi" id="sHi">$0</span></div>
+    <div class="r-psf" id="sPsf"></div>
+    <div class="r-specs"><p id="sSpecs"></p></div>
+    <div class="thin-data" id="sThin"></div>
+    <div class="r-note">Excludes shipping, crating, sales tax, and installation. Verbal ballpark only.</div>
+  </div>
+
+  <!-- LEADLIGHT RESULT -->
+  <div class="result" id="leadlightResult">
+    <div class="r-label">Ballpark Estimate</div>
+    <div class="r-cols">
+      <div>
+        <div class="r-col-title">American Seedy</div>
+        <div class="r-col-val" id="americanVal">$0</div>
+        <div class="r-col-psf" id="americanPsf"></div>
+      </div>
+      <div>
+        <div class="r-col-title">German Seedy</div>
+        <div class="r-col-val" id="germanVal">$0</div>
+        <div class="r-col-psf" id="germanPsf"></div>
+      </div>
+    </div>
+    <div class="r-specs"><p id="lSpecs"></p></div>
+    <div class="thin-data" id="lThin"></div>
+    <div class="escalate" id="lExtrap">
+      <div class="escalate-title">Outside known size range</div>
+      <div class="escalate-body" id="lExtrapBody"></div>
+    </div>
+    <div class="r-note">German Seedy applies an estimated 20&ndash;35% materials premium over American Seedy &mdash; design and build cost are the same either way. Excludes shipping, crating, sales tax, and installation.</div>
+  </div>
+
+  <div class="footer">
+    Pulls from the same training data as ted_estimator_v5.html. If the sync date above is more than a few weeks old, check with whoever maintains the estimator before relying on this for anything but a rough verbal number.
+  </div>
+</div>
+
+<script>
+// ===================================================================
+// SYNC DATE — update this whenever ted_estimator_v5.html's training
+// data changes (new projects added, patterns added, rules revised).
+// This is a manual sync, not automatic.
+// ===================================================================
+const SYNC_DATE_DISPLAY = "Synced June 30, 2026";
+document.getElementById('syncLabel').textContent = SYNC_DATE_DISPLAY;
+
+function fmt(n){ return '$' + Math.round(n).toLocaleString(); }
+
+// =================== RONDEL ===================
+const RONDEL_LANES = {
+  Offset: {
+    Clear:  { small: null,        medium: [710, 980],  large: [770, 1130], xl: [650, 650] },
+    Color:  { small: [940, 1250], medium: [910, 1370], large: [1060, 1060], xl: null }
+  },
+  Align: {
+    Clear:  { small: [860, 1210],  medium: null, large: null, xl: null },
+    Color:  { small: [1100, 1660], medium: [920, 920], large: null, xl: null }
+  },
+  Lucent: {
+    Clear:  { small: [600, 700],  medium: [510, 680], large: [400, 540], xl: [390, 420] },
+    Color:  { small: [880, 960],  medium: [750, 950], large: [590, 760], xl: [575, 650] }
+  }
+};
+const RONDEL_THIN = {
+  "Offset|Clear|large": "Backed by 3 examples.",
+  "Offset|Clear|xl": "Backed by a single example — directional only.",
+  "Offset|Color|large": "Backed by a single example — directional only.",
+  "Align|Clear|small": "Backed by 2 examples.",
+  "Align|Color|small": "Backed by 4 examples.",
+  "Align|Color|medium": "Backed by a single example — directional only.",
+  "Lucent|Clear|small": "No clear Lucent projects exist yet — estimated at 25–35% below color.",
+  "Lucent|Clear|medium": "No clear Lucent projects exist yet — estimated at 25–35% below color.",
+  "Lucent|Clear|large": "No clear Lucent projects exist yet — estimated at 25–35% below color.",
+  "Lucent|Clear|xl": "No clear Lucent projects exist yet — estimated at 25–35% below color."
+};
+function sizeLane(sqft){
+  if(sqft < 10) return 'small';
+  if(sqft < 20) return 'medium';
+  if(sqft < 35) return 'large';
+  return 'xl';
+}
+function laneLabel(lane){
+  return {small:'Small (<10 sf)', medium:'Medium (10–20 sf)', large:'Large (20–35 sf)', xl:'XL (35+ sf)'}[lane];
+}
+function calcArea(w,h,shape){
+  const r=w/2;
+  if(shape==='Arch') return (Math.PI*r*h/2)/144;
+  if(shape==='Archtop'){const rh=Math.max(0,h-r);return (w*rh+Math.PI*r*r/2)/144;}
+  return (w*h)/144;
+}
+
+let rGroupCount = 0;
+function addRGroup(){
+  rGroupCount++;
+  const div = document.createElement('div');
+  div.className = 'group-card';
+  div.id = 'rgroup-' + rGroupCount;
+  const canRemove = document.querySelectorAll('#rGroups .group-card').length > 0;
+  div.innerHTML = `<div class="group-header"><span class="group-label">Panel ${document.querySelectorAll('#rGroups .group-card').length+1}</span>${canRemove ? '<button class="group-remove" onclick="removeRGroup(this)">Remove</button>' : ''}</div><div class="group-row4"><div class="field"><label>Width</label><input type="number" class="rgw" placeholder='32&quot;' step="0.25" oninput="calc()"></div><div class="field"><label>Height</label><input type="number" class="rgh" placeholder='82&quot;' step="0.25" oninput="calc()"></div><div class="field"><label>Qty</label><input type="number" class="rgq" value="1" min="1" step="1" oninput="calc()"></div><div class="field"><label>Shape</label><select class="rgs" onchange="calc()"><option value="Rect">Rectangle</option><option value="Archtop">Archtop</option><option value="Arch">Arch</option></select></div></div>`;
+  document.getElementById('rGroups').appendChild(div);
+  renumberRGroups();
+  calc();
+}
+function removeRGroup(btn){ btn.closest('.group-card').remove(); renumberRGroups(); calc(); }
+function renumberRGroups(){
+  const cards = document.querySelectorAll('#rGroups .group-card');
+  cards.forEach((c,i)=>{ c.querySelector('.group-label').textContent = 'Panel ' + (i+1); });
+  if(cards.length === 1){ const rb = cards[0].querySelector('.group-remove'); if(rb) rb.style.display = 'none'; }
+  else cards.forEach(c=>{ const rb = c.querySelector('.group-remove'); if(rb) rb.style.display = ''; });
+}
+function getRGroups(){
+  const g = [];
+  document.querySelectorAll('#rGroups .group-card').forEach(card=>{
+    const w = parseFloat(card.querySelector('.rgw').value);
+    const h = parseFloat(card.querySelector('.rgh').value);
+    const q = parseInt(card.querySelector('.rgq').value) || 1;
+    const s = card.querySelector('.rgs').value;
+    if(!w || w < 3 || !h || h < 1) return;
+    g.push({ w, h, qty: q, shape: s, area: calcArea(w,h,s) });
+  });
+  return g;
+}
+
+function calcRondel(){
+  const pattern = document.getElementById('rPattern').value;
+  const colorVal = document.getElementById('rColor').value;
+  const groups = getRGroups();
+  const result = document.getElementById('rondelResult');
+  const escalate = document.getElementById('rEscalate');
+  const noData = document.getElementById('rNoData');
+  result.classList.remove('show'); escalate.classList.remove('show'); noData.classList.remove('show');
+
+  if(groups.length === 0) return;
+  const sqft = groups.reduce((s,g)=>s+g.area*g.qty, 0);
+  const totalPanels = groups.reduce((s,g)=>s+g.qty, 0);
+  const lane = sizeLane(sqft);
+
+  const si = {Rect:'',Archtop:' (archtop)',Arch:' (arch)'};
+  const dims = groups.map(g => `${g.qty>1?g.qty+'× ':''}${g.w}"×${g.h}"${si[g.shape]||''}`).join(' + ');
+
+  if(lane === 'large' || lane === 'xl'){
+    escalate.classList.add('show');
+    document.getElementById('rEscalateBody').textContent =
+      `This is a ${laneLabel(lane).split(' ')[0]} project (${sqft.toFixed(1)} sq ft). Per TED policy, Large and XL Rondel projects always go through the full estimator rather than a verbal ballpark.`;
+    return;
+  }
+
+  const range = RONDEL_LANES[pattern][colorVal][lane];
+  if(!range){
+    noData.classList.add('show');
+    document.getElementById('rNoDataBody').textContent =
+      `No training examples exist yet for ${pattern} / ${colorVal} / ${laneLabel(lane)}. Don't guess — use the full estimator.`;
+    return;
+  }
+
+  document.getElementById('rLo').textContent = fmt(range[0]*sqft);
+  document.getElementById('rHi').textContent = fmt(range[1]*sqft);
+  document.getElementById('rPsf').textContent = `${fmt(range[0])}–${fmt(range[1])} per sq ft`;
+  document.getElementById('rSpecs').innerHTML = `<strong>${pattern}</strong> &middot; ${colorVal} &middot; ${dims} &middot; ${totalPanels} panel${totalPanels>1?'s':''} &middot; ${laneLabel(lane)} &middot; ${sqft.toFixed(1)} sq ft total`;
+  const thinKey = `${pattern}|${colorVal}|${lane}`;
+  const thinEl = document.getElementById('rThin');
+  if(RONDEL_THIN[thinKey]){ thinEl.textContent = RONDEL_THIN[thinKey]; thinEl.classList.add('show'); }
+  else thinEl.classList.remove('show');
+  result.classList.add('show');
+}
+
+// =================== SASHIKO ===================
+const SASHIKO = { Standard: [815, 965], Honed: [955, 1105] };
+const SASHIKO_RANGE = [11.8, 31];
+function calcSashiko(){
+  const finish = document.getElementById('sFinish').value;
+  const fw = parseFloat(document.getElementById('sFaceW').value);
+  const fh = parseFloat(document.getElementById('sFaceH').value);
+  const bw = parseFloat(document.getElementById('sBoxW').value) || 0;
+  const bh = parseFloat(document.getElementById('sBoxH').value) || 0;
+  const result = document.getElementById('sashikoResult');
+  result.classList.remove('show');
+  if(!fw || !fh || fw < 6 || fh < 6) return;
+  const faceArea = (fw*fh)/144;
+  const boxArea = (bw*bh)/144;
+  const sqft = faceArea - boxArea;
+  if(sqft <= 0) return;
+  const range = SASHIKO[finish];
+
+  document.getElementById('sLo').textContent = fmt(range[0]*sqft);
+  document.getElementById('sHi').textContent = fmt(range[1]*sqft);
+  document.getElementById('sPsf').textContent = `${fmt(range[0])}–${fmt(range[1])} per sq ft`;
+  document.getElementById('sSpecs').innerHTML = `<strong>Mosaic Sashiko</strong> &middot; ${finish} &middot; Face ${fw}"&times;${fh}" &middot; Firebox ${bw}"&times;${bh}" &middot; Net area ${sqft.toFixed(1)} sq ft`;
+
+  const thinEl = document.getElementById('sThin');
+  if(sqft < SASHIKO_RANGE[0] || sqft > SASHIKO_RANGE[1]){
+    thinEl.textContent = `Sashiko training data covers ${SASHIKO_RANGE[0]}–${SASHIKO_RANGE[1]} sq ft net area (n=4) — ${sqft.toFixed(1)} sq ft is outside that range, treat as extrapolated.`;
+  } else {
+    thinEl.textContent = `Sashiko training data covers ${SASHIKO_RANGE[0]}–${SASHIKO_RANGE[1]} sq ft net area (n=4 examples).`;
+  }
+  thinEl.classList.add('show');
+  result.classList.add('show');
+}
+
+// =================== LEADLIGHT ===================
+const LEADLIGHT_DATA = {
+  Century:  [[5.2, 4407], [10.0, 6041], [53.15, 38249]],
+  Jot:      [[6.7, 6626], [15.3, 7862]],
+  Slanted:  [[8.8, 4258], [37.2, 15647]],
+  Superball:[[15.6, 10325], [19.6, 10510]]
+};
+const LEADLIGHT_SAMPLE_SIZE = { Century: 3, Jot: 2, Slanted: 2, Superball: 2 };
+const GERMAN_PREMIUM = 1.25;
+
+let lGroupCount = 0;
+function addLGroup(){
+  lGroupCount++;
+  const div = document.createElement('div');
+  div.className = 'group-card';
+  div.id = 'lgroup-' + lGroupCount;
+  const canRemove = document.querySelectorAll('#lGroups .group-card').length > 0;
+  div.innerHTML = `<div class="group-header"><span class="group-label">Panel ${document.querySelectorAll('#lGroups .group-card').length+1}</span>${canRemove ? '<button class="group-remove" onclick="removeLGroup(this)">Remove</button>' : ''}</div><div class="group-row3"><div class="field"><label>Width</label><input type="number" class="lgw" placeholder='32&quot;' step="0.25" oninput="calc()"></div><div class="field"><label>Height</label><input type="number" class="lgh" placeholder='48&quot;' step="0.25" oninput="calc()"></div><div class="field"><label>Qty</label><input type="number" class="lgq" value="1" min="1" step="1" oninput="calc()"></div></div>`;
+  document.getElementById('lGroups').appendChild(div);
+  renumberLGroups();
+  calc();
+}
+function removeLGroup(btn){ btn.closest('.group-card').remove(); renumberLGroups(); calc(); }
+function renumberLGroups(){
+  const cards = document.querySelectorAll('#lGroups .group-card');
+  cards.forEach((c,i)=>{ c.querySelector('.group-label').textContent = 'Panel ' + (i+1); });
+  if(cards.length === 1){ const rb = cards[0].querySelector('.group-remove'); if(rb) rb.style.display = 'none'; }
+  else cards.forEach(c=>{ const rb = c.querySelector('.group-remove'); if(rb) rb.style.display = ''; });
+}
+function getLGroups(){
+  const g = [];
+  document.querySelectorAll('#lGroups .group-card').forEach(card=>{
+    const w = parseFloat(card.querySelector('.lgw').value);
+    const h = parseFloat(card.querySelector('.lgh').value);
+    const q = parseInt(card.querySelector('.lgq').value) || 1;
+    if(!w || w < 3 || !h || h < 3) return;
+    g.push({ w, h, qty: q, area: (w*h)/144 });
+  });
+  return g;
+}
+function interpolateLeadlight(pattern, sqft){
+  const pts = LEADLIGHT_DATA[pattern].slice().sort((a,b)=>a[0]-b[0]);
+  if(sqft <= pts[0][0]){
+    const psf = pts[0][1] / pts[0][0];
+    return { total: psf * sqft, extrapolated: sqft < pts[0][0] };
+  }
+  if(sqft >= pts[pts.length-1][0]){
+    const last = pts[pts.length-1];
+    const psf = last[1] / last[0];
+    return { total: psf * sqft, extrapolated: sqft > last[0] };
+  }
+  for(let i=0;i<pts.length-1;i++){
+    const s0 = pts[i][0], c0 = pts[i][1], s1 = pts[i+1][0], c1 = pts[i+1][1];
+    if(sqft >= s0 && sqft <= s1){
+      const frac = (sqft - s0) / (s1 - s0);
+      return { total: c0 + frac * (c1 - c0), extrapolated: false };
+    }
+  }
+  return { total: 0, extrapolated: true };
+}
+function calcLeadlight(){
+  const pattern = document.getElementById('lPattern').value;
+  const groups = getLGroups();
+  const result = document.getElementById('leadlightResult');
+  if(groups.length === 0){ result.classList.remove('show'); return; }
+
+  const totalSqft = groups.reduce((s,g)=>s+g.area*g.qty, 0);
+  const totalPanels = groups.reduce((s,g)=>s+g.qty, 0);
+  const interp = interpolateLeadlight(pattern, totalSqft);
+  const americanTotal = interp.total;
+  const germanTotal = americanTotal * GERMAN_PREMIUM;
+
+  document.getElementById('americanVal').textContent = fmt(americanTotal);
+  document.getElementById('americanPsf').textContent = fmt(americanTotal/totalSqft) + '/sq ft';
+  document.getElementById('germanVal').textContent = fmt(germanTotal);
+  document.getElementById('germanPsf').textContent = fmt(germanTotal/totalSqft) + '/sq ft';
+
+  const dims = groups.map(g => `${g.qty>1?g.qty+'× ':''}${g.w}"×${g.h}"`).join(' + ');
+  document.getElementById('lSpecs').innerHTML = `<strong>${pattern}</strong> &middot; ${dims} &middot; ${totalPanels} panel${totalPanels>1?'s':''} &middot; ${totalSqft.toFixed(1)} sq ft total`;
+
+  const thinEl = document.getElementById('lThin');
+  thinEl.textContent = `Based on ${LEADLIGHT_SAMPLE_SIZE[pattern]} historical ${pattern} project${LEADLIGHT_SAMPLE_SIZE[pattern]>1?'s':''} — treat as directional, especially for unusual panel shapes.`;
+  thinEl.classList.add('show');
+
+  const extrapEl = document.getElementById('lExtrap');
+  if(interp.extrapolated){
+    extrapEl.classList.add('show');
+    document.getElementById('lExtrapBody').textContent = `${totalSqft.toFixed(1)} sq ft is outside the size range of known ${pattern} projects — this figure is extrapolated, not interpolated. Treat with extra caution and route to the full estimator.`;
+  } else {
+    extrapEl.classList.remove('show');
+  }
+  result.classList.add('show');
+}
+
+// =================== SWITCHING ===================
+function switchProduct(){
+  const p = document.getElementById('product').value;
+  document.getElementById('rondel-fields').classList.toggle('active', p === 'Rondel');
+  document.getElementById('sashiko-fields').classList.toggle('active', p === 'Sashiko');
+  document.getElementById('leadlight-fields').classList.toggle('active', p === 'Leadlight');
+  document.getElementById('rondelResult').classList.remove('show');
+  document.getElementById('rEscalate').classList.remove('show');
+  document.getElementById('rNoData').classList.remove('show');
+  document.getElementById('sashikoResult').classList.remove('show');
+  document.getElementById('leadlightResult').classList.remove('show');
+  calc();
+}
+function calc(){
+  const p = document.getElementById('product').value;
+  if(p === 'Rondel') calcRondel();
+  else if(p === 'Sashiko') calcSashiko();
+  else calcLeadlight();
+}
+
+switchProduct();
+addRGroup();
+addLGroup();
+</script>
+</body>
+</html>
